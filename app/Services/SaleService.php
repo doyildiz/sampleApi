@@ -56,8 +56,10 @@ class SaleService extends OrderService
         if ($this->total > 1000) {
             $response = [
                 'discountReason' => __FUNCTION__,
-                'discountAmount' => (10 / 100) * $this->total,
-                'subtotal' => $this->total - (10 / 100) * $this->total,
+                'discountAmount' => number_format((10 / 100) * $this->total,
+                        2, '.', ','),
+                'subtotal' => number_format($this->total - (10 / 100) * $this->total,
+                        2, '.', ','),
             ];
         }
 
@@ -74,8 +76,10 @@ class SaleService extends OrderService
             if ($this->helper($detail, self::free_cat_id) && $detail->quantity == self::free_cat_min_qty) {
                 $response[] = [
                     'discountReason' => __FUNCTION__,
-                    'discountAmount' => $this->getProduct($detail->productId)->price,
-                    'subtotal' => $this->total - $this->getProduct($detail->productId)->price,
+                    'discountAmount' => number_format($this->getProduct($detail->productId)->price,
+                        2, '.', ','),
+                    'subtotal' => number_format($this->total - $this->getProduct($detail->productId)->price,
+                        2, '.', ','),
                 ];
             }
         }
@@ -93,8 +97,10 @@ class SaleService extends OrderService
                 && $detail->quantity >= self::discount_cat_min_qty) {
                 $response[] = [
                     'discountReason' => __FUNCTION__,
-                    'discountAmount' => (20 / 100) * $this->cheaperProduct()->total,
-                    'subtotal' => $this->total - (20 / 100) * $this->cheaperProduct()->total,
+                    'discountAmount' => number_format((20 / 100) * $this->cheaperProduct()->total,
+                            2, '.', ','),
+                    'subtotal' => number_format($this->total - (20 / 100) * $this->cheaperProduct()->total,
+                        2, '.', ','),
                 ];
             }
         }
@@ -105,6 +111,7 @@ class SaleService extends OrderService
      * @param Collection $detail
      * @param int $categoryId
      * @return bool
+     * calculates how many products from a spesific category are sold
      */
     public function helper($detail, $categoryId)
     {
@@ -115,6 +122,10 @@ class SaleService extends OrderService
         return false;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\HasMany|object|null
+     * calculates cheapest product in a specific order
+     */
     public function cheaperProduct()
     {
         return $this->order->details()->orderBy('unitPrice')->first();
@@ -122,12 +133,15 @@ class SaleService extends OrderService
 
     /**
      * @return array
+     * returns all discounts of an order
      */
     public function discounts()
     {
-        $discount[] = $this->sale_10_PERCENT_OVER_1000();
-        $discount[] = $this->sale_BUY_6_GET_1();
-        $discount[] = $this->sale_20_PERCENT_BUY_1_OR_2();
+        $discount = [];
+
+        if ($this->sale_10_PERCENT_OVER_1000() !== null)$discount[] = $this->sale_10_PERCENT_OVER_1000();
+        if ($this->sale_BUY_6_GET_1() !== null)$discount[] = $this->sale_BUY_6_GET_1();
+        if ($this->sale_20_PERCENT_BUY_1_OR_2() != null)$discount[] = $this->sale_20_PERCENT_BUY_1_OR_2();
 
         return $discount;
 

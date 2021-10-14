@@ -20,6 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('list', [App\Http\Controllers\ApiController::class, 'listAllOrders']);
 Route::get('delete/{id}', [App\Http\Controllers\ApiController::class, 'delete']);
-Route::get('save', [App\Http\Controllers\ApiController::class, 'store']);
+Route::post('save', [App\Http\Controllers\ApiController::class, 'store']);
 Route::get('discount/{id}', [App\Http\Controllers\ApiController::class, 'calculateDiscount']);
 

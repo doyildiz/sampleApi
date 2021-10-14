@@ -99,6 +99,7 @@ class OrderService implements ServiceInterface
     /**
      * @param $products
      *  * @return float
+     * calculates total price of an order
      */
     public function total($products)
     {
@@ -135,6 +136,7 @@ class OrderService implements ServiceInterface
     /**
      * @param $order
      * @return void
+     * decreases inventory of a product when an order created
      */
     public function inventoryChanges($order)
     {

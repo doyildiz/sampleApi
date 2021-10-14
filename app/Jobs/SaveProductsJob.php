@@ -35,6 +35,7 @@ class SaveProductsJob implements ShouldQueue
     public function handle()
     {
         try {
+            //Saves products to database
             foreach ($this->data as $datum) {
                 Product::updateOrCreate(['id' => $datum['id']], [
                     'id' => $datum['id'],

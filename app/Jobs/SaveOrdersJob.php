@@ -36,6 +36,7 @@ class SaveOrdersJob implements ShouldQueue
     public function handle()
     {
         try {
+            //Saves order and details to database
             foreach ($this->data as $datum) {
                 $save = Order::updateOrCreate(['id' => $datum['id']], [
                     'id' => $datum['id'],

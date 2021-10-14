@@ -18,6 +18,7 @@ class Order extends Model
 
     /**
      * return void
+     * when deleting an order, it also deletes its details
      */
     public static function boot()
     {

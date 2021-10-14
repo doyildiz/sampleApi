@@ -35,6 +35,7 @@ class SaveCustomersJob implements ShouldQueue
     public function handle()
     {
         try {
+            //Saves customers to database
             foreach ($this->data as $datum) {
                 Customer::updateOrCreate(['id' => $datum['id']], [
                     'id' => $datum['id'],

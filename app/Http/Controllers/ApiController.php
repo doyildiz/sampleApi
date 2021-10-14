@@ -7,6 +7,7 @@ use App\Models\OrderDetail;
 use App\Services\OrderService;
 use App\Services\SaleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ApiController
@@ -30,28 +31,18 @@ class ApiController extends Controller
      */
     public function store(Request $request)
     {
-        $data = [
-            'customer_id' => 2,
-            'items' => [
-                [
-                    'productId' => 102,
-                    'quantity' => 2,
-                ],
-                [
-                    'productId' => 103,
-                    'quantity' => 7,
-                ]
-            ]
-        ];
-        if (!isset($data['customer_id']) || !isset($data['items']) || !isset($data['items']['productId'])
-            || !isset($data['items']['quantity'])) {
-            return response()->json([
-                'code' => 400,
-                'message' => 'Required parameters are missing'
-            ]);
+
+        $validator = Validator::make($request->all(), [
+            'customer_id' => 'required | numeric | min:0',
+            'items.*.productId' => 'required | numeric | min:0',
+            'items.*.quantity' => 'required | numeric | min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(json_encode($validator->errors()->getMessages()));
         }
 
-        $response = $this->orderService->saveOrder($data);
+        $response = $this->orderService->saveOrder($request->all());
 
         return response()->json([
             'code' => $response->getStatusCode(),
@@ -96,17 +87,29 @@ class ApiController extends Controller
      */
     public function calculateDiscount($orderId)
     {
-        $saleService = new \App\Services\SaleService(Order::find($orderId));
+        $order = Order::find($orderId);
+        if (!$order) {
+            return response()->json([
+                "data" => null,
+                "message" => 'Order not found'
+            ], 404);
+        }
+        $saleService = new \App\Services\SaleService($order);
         $discounts = $saleService->discounts();
 
         $response = [
             'orderId' => $orderId,
             'discounts' => $discounts,
-            'totalDiscount' => $saleService->totalDiscount(),
-            'discountedTotal' => $this->orderService->total(Order::find($orderId)->details->toArray())
+            'totalDiscount' => number_format($saleService->totalDiscount(),
+                2, '.', ','),
+            'discountedTotal' => number_format($this->orderService->total(Order::find($orderId)->details->toArray()),
+                2, '.', ',')
         ];
 
-        return $response;
+        return response()->json([
+            "data" => $response,
+            "message" => 'Discount calculated'
+        ], 200);
     }
 
 
