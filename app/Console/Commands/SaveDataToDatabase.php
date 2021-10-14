@@ -58,7 +58,7 @@ class SaveDataToDatabase extends Command
      */
     public function parser($file_name)
     {
-        $str = file_get_contents(storage_path('app/sample-files/' . $file_name));
+        $str = file_get_contents(public_path('sample-files/' . $file_name));
         $data = json_decode($str, true);
 
         return $data;
